@@ -1,4 +1,4 @@
-import { FormDataConvertible, Method, Progress, router, VisitOptions } from '@inertiajs/core'
+import { FormDataConvertible, RequestPayload, Method, Progress, router, VisitOptions } from '@inertiajs/core'
 import isEqual from 'lodash.isequal'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import useRemember from './useRemember'
@@ -59,7 +59,8 @@ export default function useForm<TForm extends FormDataType>(
   const [progress, setProgress] = useState(null)
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
-  let transform = (data) => data
+  // let transform = (data) => data
+  let transformRef = useRef((data: TForm) => data as Object)
 
   useEffect(() => {
     isMounted.current = true
@@ -157,10 +158,11 @@ export default function useForm<TForm extends FormDataType>(
         },
       }
 
+      let transformedData = transformRef.current(structuredClone(data)) as RequestPayload
       if (method === 'delete') {
-        router.delete(url, { ..._options, data: transform(data) })
+        router.delete(url, { ..._options, data: transformedData })
       } else {
-        router[method](url, transform(data), _options)
+        router[method](url, transformedData, _options)
       }
     },
     [data, setErrors],
@@ -185,7 +187,7 @@ export default function useForm<TForm extends FormDataType>(
     wasSuccessful,
     recentlySuccessful,
     transform(callback) {
-      transform = callback
+      transformRef.current = callback
     },
     setDefaults(fieldOrFields?: keyof TForm | Partial<TForm>, maybeValue?: FormDataConvertible) {
       if (typeof fieldOrFields === 'undefined') {
