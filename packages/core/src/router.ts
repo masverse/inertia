@@ -83,7 +83,7 @@ export class Router {
 
   protected handleInitialPageVisit(page: Page): void {
     this.page.url += window.location.hash
-    this.setPage(page, { preserveState: true }).then(() => fireNavigateEvent(page))
+    this.setPage(page, { preserveState: true, visitId: this.visitId ?? undefined }).then(() => fireNavigateEvent(page))
   }
 
   protected setupEventListeners(): void {
@@ -264,14 +264,14 @@ export class Router {
       headers = {},
       errorBag = '',
       forceFormData = false,
-      onCancelToken = () => {},
-      onBefore = () => {},
-      onStart = () => {},
-      onProgress = () => {},
-      onFinish = () => {},
-      onCancel = () => {},
-      onSuccess = () => {},
-      onError = () => {},
+      onCancelToken = () => { },
+      onBefore = () => { },
+      onStart = () => { },
+      onProgress = () => { },
+      onFinish = () => { },
+      onCancel = () => { },
+      onSuccess = () => { },
+      onError = () => { },
       queryStringArrayFormat = 'brackets',
     }: VisitOptions = {},
   ): void {
@@ -356,18 +356,18 @@ export class Router {
         'X-Inertia': true,
         ...(isPartial
           ? {
-              'X-Inertia-Partial-Component': this.page.component,
-            }
+            'X-Inertia-Partial-Component': this.page.component,
+          }
           : {}),
         ...(only.length
           ? {
-              'X-Inertia-Partial-Data': only.join(','),
-            }
+            'X-Inertia-Partial-Data': only.join(','),
+          }
           : {}),
         ...(except.length
           ? {
-              'X-Inertia-Partial-Except': except.join(','),
-            }
+            'X-Inertia-Partial-Except': except.join(','),
+          }
           : {}),
         ...(errorBag && errorBag.length ? { 'X-Inertia-Error-Bag': errorBag } : {}),
         ...(this.page.version ? { 'X-Inertia-Version': this.page.version } : {}),
@@ -521,8 +521,7 @@ export class Router {
 
   public replace(url: URL | string, options: Omit<VisitOptions, 'replace'> = {}): void {
     console.warn(
-      `Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${
-        options.method ?? 'get'
+      `Inertia.replace() has been deprecated and will be removed in a future release. Please use Inertia.${options.method ?? 'get'
       }() instead.`,
     )
     return this.visit(url, { preserveState: true, ...options, replace: true })
